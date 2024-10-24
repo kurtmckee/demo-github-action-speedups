@@ -1,0 +1,46 @@
+name: "🧪 Test"
+
+on:
+  workflow_dispatch:
+    null
+
+jobs:
+  test:
+    name:
+      "${{
+        (startsWith(matrix.runner, 'ubuntu') && 'Linux')
+        || (startsWith(matrix.runner, 'macos') && 'macOS')
+        || (startsWith(matrix.runner, 'windows') && 'Windows')
+      }} / py${{ matrix.python }}"
+
+    strategy:
+      matrix:
+        runner:
+          - "ubuntu-latest"
+          - "windows-latest"
+          - "macos-latest"
+        python:
+          - "3.8"
+          - "3.9"
+          - "3.10"
+          - "3.11"
+          - "3.12"
+          - "3.13"
+
+    runs-on: "${{ matrix.runner }}"
+    steps:
+      - name: "Checkout repo"
+        uses: "actions/checkout@v4"
+
+      - name: "Setup Python"
+        uses: "actions/setup-python@v5"
+        with:
+          python-version: "${{ matrix.python }}"
+
+      - name: "Install tox"
+        run: |
+          pip install tox
+
+      - name: "Run tox"
+        run: |
+          tox -e py
