@@ -35,14 +35,42 @@ jobs:
         uses: "actions/checkout@v4"
 
       - name: "Setup Python"
+        id: "setup-python"
         uses: "actions/setup-python@v5"
         with:
           python-version: "${{ join(matrix.pythons, '\n') }}"
 
-      - name: "Install tox"
+      - name: "Restore cache"
+        id: "restore-cache"
+        uses: "actions/cache@v4"
+        with:
+          key:
+            "${{
+              format(
+                'test-os={0}-python={1}-hash={2}',
+                matrix.runner,
+                steps.setup-python.outputs.python-version,
+                hashFiles(
+                  'pyproject.toml',
+                  'tox.ini'
+                )
+              )
+            }}"
+          path: |
+            .venv/
+
+      - name: "Identify venv path"
+        shell: "bash"
         run: |
-          pip install tox
+          echo 'venv-path=.venv/${{ runner.os == 'Windows' && 'Scripts' || 'bin' }}' >> "$GITHUB_ENV"
+
+      - name: "Install tox"
+        if: "steps.restore-cache.outputs.cache-hit != 'true'"
+        run: |
+          python -m venv .venv/
+          ${{ env.venv-path }}/python -m pip install --upgrade pip setuptools wheel
+          ${{ env.venv-path }}/python -m pip install tox
 
       - name: "Run tox"
         run: |
-          tox
+          ${{ env.venv-path }}/tox
