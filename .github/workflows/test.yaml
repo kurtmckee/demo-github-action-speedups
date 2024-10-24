@@ -1,0 +1,13 @@
+name: "🧪 Test"
+
+on:
+  workflow_dispatch:
+    null
+
+jobs:
+  test:
+    name: "Placeholder"
+    runs-on: "ubuntu-latest"
+    steps:
+      - run: |
+          echo "The Test workflow must exist in the `main` branch."
