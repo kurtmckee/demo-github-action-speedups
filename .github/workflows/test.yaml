@@ -11,7 +11,7 @@ jobs:
         (startsWith(matrix.runner, 'ubuntu') && 'Linux')
         || (startsWith(matrix.runner, 'macos') && 'macOS')
         || (startsWith(matrix.runner, 'windows') && 'Windows')
-      }} / py${{ matrix.python }}"
+      }}"
 
     strategy:
       matrix:
@@ -19,13 +19,15 @@ jobs:
           - "ubuntu-latest"
           - "windows-latest"
           - "macos-latest"
-        python:
-          - "3.8"
-          - "3.9"
-          - "3.10"
-          - "3.11"
-          - "3.12"
-          - "3.13"
+
+        include:
+          - pythons:
+              - "3.8"
+              - "3.9"
+              - "3.10"
+              - "3.11"
+              - "3.12"
+              - "3.13"
 
     runs-on: "${{ matrix.runner }}"
     steps:
@@ -35,7 +37,7 @@ jobs:
       - name: "Setup Python"
         uses: "actions/setup-python@v5"
         with:
-          python-version: "${{ matrix.python }}"
+          python-version: "${{ join(matrix.pythons, '\n') }}"
 
       - name: "Install tox"
         run: |
@@ -43,4 +45,4 @@ jobs:
 
       - name: "Run tox"
         run: |
-          tox -e py
+          tox
