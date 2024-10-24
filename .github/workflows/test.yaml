@@ -35,10 +35,12 @@ jobs:
         uses: "actions/checkout@v4"
 
       - name: "Setup Python"
-        id: "setup-python"
         uses: "actions/setup-python@v5"
         with:
           python-version: "${{ join(matrix.pythons, '\n') }}"
+
+      - name: "Detect Pythons"
+        uses: "kurtmckee/detect-pythons@v1"
 
       - name: "Restore cache"
         id: "restore-cache"
@@ -47,16 +49,18 @@ jobs:
           key:
             "${{
               format(
-                'test-os={0}-python={1}-hash={2}',
+                'test-os={0}-hash={1}',
                 matrix.runner,
-                steps.setup-python.outputs.python-version,
                 hashFiles(
+                  '.python-identifiers',
+                  'requirements/*/requirements.txt',
                   'pyproject.toml',
                   'tox.ini'
                 )
               )
             }}"
           path: |
+            .tox/
             .venv/
 
       - name: "Identify venv path"

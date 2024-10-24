@@ -1,0 +1,7 @@
+colorama==0.4.6 ; python_version >= "3.8" and sys_platform == "win32"
+exceptiongroup==1.2.2 ; python_version < "3.11" and python_version >= "3.8"
+iniconfig==2.0.0 ; python_version >= "3.8"
+packaging==24.1 ; python_version >= "3.8"
+pluggy==1.5.0 ; python_version >= "3.8"
+pytest==8.3.3 ; python_version >= "3.8"
+tomli==2.0.2 ; python_version < "3.11" and python_version >= "3.8"
