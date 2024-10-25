@@ -42,34 +42,12 @@ jobs:
       - name: "Detect Pythons"
         uses: "kurtmckee/detect-pythons@v1"
 
-      - name: "Restore cache"
-        id: "restore-cache"
-        uses: "actions/cache@v4"
-        with:
-          key:
-            "${{
-              format(
-                'test-os={0}-hash={1}',
-                matrix.runner,
-                hashFiles(
-                  '.python-identifiers',
-                  'requirements/*/requirements.txt',
-                  'pyproject.toml',
-                  'tox.ini'
-                )
-              )
-            }}"
-          path: |
-            .tox/
-            .venv/
-
       - name: "Identify venv path"
         shell: "bash"
         run: |
           echo 'venv-path=.venv/${{ runner.os == 'Windows' && 'Scripts' || 'bin' }}' >> "$GITHUB_ENV"
 
       - name: "Install tox"
-        if: "steps.restore-cache.outputs.cache-hit != 'true'"
         run: |
           python -m venv .venv/
           ${{ env.venv-path }}/python -m pip install --upgrade pip setuptools wheel
