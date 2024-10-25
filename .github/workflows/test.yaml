@@ -5,7 +5,32 @@ on:
     null
 
 jobs:
+  build:
+    name: "Build wheel"
+    outputs:
+      wheel-name: "${{ steps.build-wheel.outputs.wheel-name }}"
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: "Checkout repo"
+        uses: "actions/checkout@v4"
+
+      - name: "Build wheel"
+        id: "build-wheel"
+        run: |
+          python -m pip install build
+          python -m build --wheel
+          echo "wheel-name=$(ls -1 dist/ | head -n 1)" >> "$GITHUB_OUTPUT"
+
+      - name: "Upload wheel"
+        uses: "actions/upload-artifact@v4"
+        with:
+          name: "wheel"
+          retention-days: 1
+          path: "dist/${{ steps.build-wheel.outputs.wheel-name }}"
+
   test:
+    needs:
+      - "build"
     name:
       "${{
         (startsWith(matrix.runner, 'ubuntu') && 'Linux')
@@ -75,6 +100,11 @@ jobs:
           ${{ env.venv-path }}/python -m pip install --upgrade pip setuptools wheel
           ${{ env.venv-path }}/python -m pip install tox
 
+      - name: "Download wheel"
+        uses: "actions/download-artifact@v4"
+        with:
+          name: "wheel"
+
       - name: "Run tox"
         run: |
-          ${{ env.venv-path }}/tox
+          ${{ env.venv-path }}/tox --installpkg "${{ needs.build.outputs.wheel-name }}"
